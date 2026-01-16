@@ -8,10 +8,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(readxl)
 library(nflreadr)
 ```
 
 ## Upload and Clean Data
+
+### PFR Draft Data
 
 ```{r}
 
@@ -51,6 +54,15 @@ draft_data = drafts %>%
 write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
 
 ```
+
+### Draft Value Charts
+
+```{r}
+
+
+
+```
+
 
 ## Exploratory Data Analysis
 
@@ -95,7 +107,6 @@ draft_data %>%
 ```
 
 ### Weighted AV Per Player, by Position Category, by Round
-
 
 ```{r}
 
