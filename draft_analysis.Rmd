@@ -84,7 +84,9 @@ draft_data = draft_data_raw %>%
   left_join(draft_value_meers, by = "pick") %>%
   left_join(draft_value_johnson, by = "pick") %>%
   mutate(efficiency_overall = round(w_av / meers_value, 3),
-         efficiency_team = round(dr_av / meers_value, 3))
+         efficiency_team = round(dr_av / meers_value, 3),
+        efficiency_overall_johnson = round(w_av / johnson_value, 3),
+        efficiency_team_johnson = round(dr_av / johnson_value, 3),)
 
 ```
 
@@ -238,4 +240,38 @@ scatter_meers_pos = draft_data %>%
 
 ```
 
+## Building a Shiny Dashboard!
+
+```{r}
+
+draft_clean <- draft_data %>%
+  transmute(
+    season,
+    team,
+    round,
+    pick_overall = pick,
+    player = pfr_player_name,
+    position,
+    side,
+    draft_day,
+
+    # AV inputs
+    w_av,
+    dr_av,
+
+    # draft value models
+    meers_value,
+    johnson_value,
+
+    # precomputed draft value efficiencies
+    efficiency_overall,  # w_av / meers_value
+    efficiency_team,    # dr_av / meers_value
+    efficiency_overall_johnson,
+    efficiency_team_johnson
+  )
+
+write_rds(draft_clean, "Data/draft_shiny.rds")
+
+
+```
 
