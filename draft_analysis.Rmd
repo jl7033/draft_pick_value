@@ -1,0 +1,36 @@
+---
+title: "draft_analysis"
+author: "Joe LaRocca"
+date: "2026-01-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(nflreadr)
+```
+
+```{r}
+
+drafts = load_draft_picks(seasons = 1994:2015)
+
+# start in 1994 since that's when NFL draft first had the current seven-round format
+
+draft_data = drafts %>%
+  select(season, round, pick, pfr_player_name, position, category, team, w_av)
+
+```
+
+```{r}
+
+draft_data
+
+```
+
+```{r}
+
+drafts
+
+```
+
