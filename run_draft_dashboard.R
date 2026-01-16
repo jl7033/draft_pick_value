@@ -118,27 +118,36 @@ server <- function(input, output) {
   output$eff_plot <- renderPlotly({
     df <- filtered_data()
     
+    # Get the selected team's color
+    team_col <- team_colors[df$team[1]]  # only one team selected
+    
     plot_ly(
       df,
       x = ~pick_overall,
-      y = df[[input$metric]],
+      y = ~get(input$metric),
       type = "bar",
       text = ~paste0(
         "Year: ", season,
         "<br>Player: ", player,
         "<br>Pick: ", pick_overall,
-        "<br>Efficiency: ", round(df[[input$metric]], 3)
+        "<br>Efficiency: ", round(get(input$metric), 3)
       ),
       marker = list(
-        color = unname(team_colors[df$team]),
+        color = team_col,
         line = list(color = "black", width = 1)
       )
     ) %>%
       layout(
-        xaxis = list(title = "Overall Pick Number", range = c(1,270), tick0 = 0, dtick = 20),
+        xaxis = list(
+          title = "Overall Pick Number",
+          range = c(1, 270),
+          tick0 = 0,
+          dtick = 20
+        ),
         yaxis = list(title = "Weighted AV per Draft Value")
       )
   })
+  
   
   # 3. Summary efficiency statistic
   output$summary_stat <- renderText({
