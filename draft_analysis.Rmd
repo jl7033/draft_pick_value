@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(cowplot)
 library(readxl)
 library(nflreadr)
 ```
@@ -127,7 +128,7 @@ draft_data %>%
 
 ```
 
-### Weighted AV Per Player, by Position Category, by Round
+### Weighted AV Per Player, by Position Category, by Day
 
 ```{r}
 
@@ -144,11 +145,11 @@ draft_data %>%
 
 ```
 
-### Scatterplot of Johnson Draft Value vs. Weighted AV
+### Scatterplots of Draft Value vs. Weighted AV
 
 ```{r}
 
-draft_data %>%
+scatter_johnson = draft_data %>%
   group_by(pick) %>%
   summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -156,13 +157,16 @@ draft_data %>%
   left_join(draft_value_johnson, by = "pick") %>%
   ggplot(aes(x = johnson_value, y = mean_av)) + 
   geom_point() + 
-  theme_classic()
+  geom_smooth(method = "lm", col = "firebrick") + 
+  geom_smooth() + 
+  theme_classic() + 
+  labs(
+    title = "Johnson Method",
+    x = "Pick Value (Johnson's Method)",
+    y = "Mean Weighted AV"
+  )
 
-```
-
-```{r}
-
-draft_data %>%
+scatter_meers = draft_data %>%
   group_by(pick) %>%
   summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -170,7 +174,66 @@ draft_data %>%
   left_join(draft_value_johnson, by = "pick") %>%
   ggplot(aes(x = meers_value, y = mean_av)) + 
   geom_point() + 
-  theme_classic()
+  geom_smooth(method = "lm", col = "firebrick") + 
+  geom_smooth() + 
+  theme_classic() + 
+  labs(
+    title = "Meers Method",
+    x = "Pick Value",
+    y = "Mean Weighted AV"
+  )
+
+plot_grid(plotlist = list(scatter_johnson, scatter_meers))
 
 ```
+
+### Scatterplots of Draft Value vs. Weighted AV, By Position Group
+
+```{r}
+
+scatter_johnson_pos = draft_data %>%
+  group_by(pick, category) %>%
+  summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
+  ungroup() %>%
+  left_join(draft_value_meers, by = "pick") %>%
+  left_join(draft_value_johnson, by = "pick") %>%
+  ggplot(aes(x = johnson_value, y = mean_av)) +
+  geom_point() + 
+  geom_smooth(method = "lm", col = "firebrick") + 
+  geom_smooth() + 
+  theme_classic() + 
+  facet_wrap(~ category) + 
+  labs(
+    title = "Johnson Method",
+    x = "Pick Value",
+    y = "Mean Weighted AV"
+  )
+
+scatter_johnson_pos
+
+```
+
+
+```{r}
+
+scatter_meers_pos = draft_data %>%
+  group_by(pick, category) %>%
+  summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
+  ungroup() %>%
+  left_join(draft_value_meers, by = "pick") %>%
+  left_join(draft_value_johnson, by = "pick") %>%
+  ggplot(aes(x = meers_value, y = mean_av)) +
+  geom_point() + 
+  geom_smooth(method = "lm", col = "firebrick") + 
+  geom_smooth() + 
+  theme_classic() + 
+  facet_wrap(~ category) + 
+  labs(
+    title = "Meers Method",
+    x = "Pick Value",
+    y = "Mean Weighted AV"
+  )
+
+```
+
 
