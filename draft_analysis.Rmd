@@ -11,20 +11,43 @@ library(tidyverse)
 library(nflreadr)
 ```
 
+## Upload and Clean Data
+
 ```{r}
 
-drafts = load_draft_picks(seasons = 1994:2015)
+drafts = load_draft_picks(seasons = 1994:2016)
 
 # start in 1994 since that's when NFL draft first had the current seven-round format
+# end in 2015 since we want players with >= 10 seasons of experience
 
 draft_data = drafts %>%
   select(season, round, pick, pfr_player_name, position, category, team, w_av)
 
+write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
+
 ```
+
+## Exploratory Data Analysis
 
 ```{r}
 
-draft_data
+basic_av_plot = draft_data %>%
+  group_by(season) %>%
+  summarize(total_av = sum(w_av, na.rm = TRUE)) %>%
+  mutate(season = factor(season, levels = rev(1994:2016))) %>%
+  ggplot(aes(x = season, y = total_av, fill = season)) + 
+  geom_bar(stat = "identity") +
+  geom_col(color = "black", linewidth = 0.8) + 
+  coord_flip() +
+  scale_fill_viridis_d(option = "C", direction = -1) + 
+  theme_classic() + 
+  theme(legend.position = "none") + 
+  labs(
+    y = "Total Weighted AV",
+    x = "Season"
+  )
+
+basic_av_plot
 
 ```
 
