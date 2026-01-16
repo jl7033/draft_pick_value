@@ -27,6 +27,11 @@ drafts = load_draft_picks(seasons = 1994:2016)
 draft_data_raw = drafts %>%
   select(season, round, pick, pfr_player_name, position, category, side, team, w_av, dr_av) %>%
   mutate(
+    team = ifelse(team == "RAI", "LVR", team),
+    team = ifelse(team == "OAK", "LVR", team),
+    team = ifelse(team == "RAM", "LAR", team),
+    team = ifelse(team == "STL", "LAR", team),
+    team = ifelse(team == "SDG", "LAC", team),
     round = factor(round, levels = 1:7),
     draft_day = case_match(
       round,
@@ -252,6 +257,7 @@ draft_clean <- draft_data %>%
     pick_overall = pick,
     player = pfr_player_name,
     position,
+    category,
     side,
     draft_day,
 
@@ -268,10 +274,10 @@ draft_clean <- draft_data %>%
     efficiency_team,    # dr_av / meers_value
     efficiency_overall_johnson,
     efficiency_team_johnson
-  )
+  ) %>%
+  mutate(category = as.character(category))
 
 write_rds(draft_clean, "Data/draft_shiny.rds")
-
 
 ```
 
