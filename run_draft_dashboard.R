@@ -5,6 +5,43 @@ library(tidyverse)
 # load data
 draft <- readRDS("Data/draft_shiny.rds")
 
+# team colors dictionary
+
+team_colors <- c(
+  "ARI" = "#97233F",
+  "ATL" = "#A71930",
+  "BAL" = "#241773",
+  "BUF" = "#00338D",
+  "CAR" = "#0085CA",
+  "CHI" = "#0B162A",
+  "CIN" = "#FB4F14",
+  "CLE" = "#311D00",
+  "DAL" = "#003594",
+  "DEN" = "#FB4F14",
+  "DET" = "#0076B6",
+  "GNB"  = "#203731",
+  "HOU" = "#03202F",
+  "IND" = "#002C5F",
+  "JAX" = "#006778",
+  "KAN"  = "#E31837",
+  "LVR"  = "#000000",
+  "LAC" = "#002A5E",
+  "LAR" = "#0B0B0B",
+  "MIA" = "#008E97",
+  "MIN" = "#4F2683",
+  "NWE"  = "#002244",
+  "NOR"  = "#D3BC8D",
+  "NYG" = "#0B2265",
+  "NYJ" = "#125740",
+  "PHI" = "#004C54",
+  "PIT" = "#FFB612",
+  "SEA" = "#002244",
+  "SFO"  = "#AA0000",
+  "TAM"  = "#D50A0A",
+  "TEN" = "#4B92DB",
+  "WAS" = "#5A1414"
+)
+
 # create the UI
 
 ui <- fluidPage(
@@ -81,32 +118,26 @@ server <- function(input, output) {
   output$eff_plot <- renderPlotly({
     df <- filtered_data()
     
-    gg <- ggplot(
+    plot_ly(
       df,
-      aes(
-        x = pick_overall,
-        y = .data[[input$metric]],
-        text = paste0(
-          "Year: ", season,
-          "<br>Player: ", player,
-          "<br>Pick: ", pick_overall,
-          "<br>Efficiency: ", round(.data[[input$metric]], 3)
-        )
+      x = ~pick_overall,
+      y = df[[input$metric]],
+      type = "bar",
+      text = ~paste0(
+        "Year: ", season,
+        "<br>Player: ", player,
+        "<br>Pick: ", pick_overall,
+        "<br>Efficiency: ", round(df[[input$metric]], 3)
+      ),
+      marker = list(
+        color = unname(team_colors[df$team]),
+        line = list(color = "black", width = 1)
       )
-    ) +
-      geom_col(width = 1, color = "black") +
-      labs(
-        x = "Overall Pick Number",
-        y = "Weighted AV per Draft Value",
-        title = paste(
-          input$team,
-          "Draft Picks (",
-          input$years[1], "–", input$years[2], ")"
-        )
-      ) +
-      theme_minimal()
-    
-    ggplotly(gg, tooltip = "text")
+    ) %>%
+      layout(
+        xaxis = list(title = "Overall Pick Number", range = c(1,270), tick0 = 0, dtick = 20),
+        yaxis = list(title = "Weighted AV per Draft Value")
+      )
   })
   
   # 3. Summary efficiency statistic
