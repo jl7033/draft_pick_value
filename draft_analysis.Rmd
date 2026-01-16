@@ -24,8 +24,8 @@ drafts = load_draft_picks(seasons = 1994:2016)
 # start in 1994 since that's when NFL draft first had the current seven-round format
 # end in 2015 since we want players with >= 10 seasons of experience
 
-draft_data = drafts %>%
-  select(season, round, pick, pfr_player_name, position, category, side, team, w_av) %>%
+draft_data_raw = drafts %>%
+  select(season, round, pick, pfr_player_name, position, category, side, team, w_av, dr_av) %>%
   mutate(
     round = factor(round, levels = 1:7),
     draft_day = case_match(
@@ -49,7 +49,7 @@ draft_data = drafts %>%
       "S" ~ "Special Teams"
     ),
     side = factor(side, levels = c("Offense", "Defense", "Special Teams")),
-    w_av = ifelse(is.na(w_av), 0, w_av) # NA means no NFL snaps; therefore 0 AV
+    w_av = ifelse(is.na(w_av), 0, w_av) # NA means no NFL snaps; therefore 0 AV,
     )
 
 write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
@@ -80,9 +80,11 @@ draft_value_johnson = read_excel("Data/nfl_draft_value_charts.xlsx", sheet = "DV
 
 ```{r}
 
-draft_data = draft_data %>%
+draft_data = draft_data_raw %>%
   left_join(draft_value_meers, by = "pick") %>%
-  left_join(draft_value_johnson, by = "pick")
+  left_join(draft_value_johnson, by = "pick") %>%
+  mutate(efficiency_overall = round(w_av / meers_value, 3),
+         efficiency_team = round(dr_av / meers_value, 3))
 
 ```
 
