@@ -59,10 +59,31 @@ write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
 
 ```{r}
 
+draft_value_meers = read_excel("Data/nfl_draft_value_charts.xlsx", sheet = "DVC_New_Raw") %>%
+  mutate(
+    value = format(value, nsmall = 1),
+    value = round(as.numeric(value), 1)
+  ) %>%
+  rename(meers_value = value)
 
+draft_value_johnson = read_excel("Data/nfl_draft_value_charts.xlsx", sheet = "DVC_Original_Raw") %>%
+  mutate(
+    value = format(value, nsmall = 1),
+    value = round(as.numeric(value), 1)
+  ) %>%
+  rename(johnson_value = value)
 
 ```
 
+### Merged Data
+
+```{r}
+
+draft_data = draft_data %>%
+  left_join(draft_value_meers, by = "pick") %>%
+  left_join(draft_value_johnson, by = "pick")
+
+```
 
 ## Exploratory Data Analysis
 
@@ -120,6 +141,36 @@ draft_data %>%
   ) + 
   facet_wrap(~ draft_day) +
   theme(legend.title = element_blank())
+
+```
+
+### Scatterplot of Johnson Draft Value vs. Weighted AV
+
+```{r}
+
+draft_data %>%
+  group_by(pick) %>%
+  summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
+  ungroup() %>%
+  left_join(draft_value_meers, by = "pick") %>%
+  left_join(draft_value_johnson, by = "pick") %>%
+  ggplot(aes(x = johnson_value, y = mean_av)) + 
+  geom_point() + 
+  theme_classic()
+
+```
+
+```{r}
+
+draft_data %>%
+  group_by(pick) %>%
+  summarize(mean_av = mean(w_av, na.rm = TRUE)) %>%
+  ungroup() %>%
+  left_join(draft_value_meers, by = "pick") %>%
+  left_join(draft_value_johnson, by = "pick") %>%
+  ggplot(aes(x = meers_value, y = mean_av)) + 
+  geom_point() + 
+  theme_classic()
 
 ```
 
