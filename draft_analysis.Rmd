@@ -21,13 +21,29 @@ drafts = load_draft_picks(seasons = 1994:2016)
 # end in 2015 since we want players with >= 10 seasons of experience
 
 draft_data = drafts %>%
-  select(season, round, pick, pfr_player_name, position, category, team, w_av)
+  select(season, round, pick, pfr_player_name, position, category, side, team, w_av) %>%
+  mutate(
+    category = ifelse(category == "K" | category == "P" | category == "LS", "ST", category),
+    category = factor(
+      category,
+      levels = c("QB", "RB", "WR", "TE", "OL", "DL", "LB", "DB", "ST")),
+    side = case_match(
+      side,
+      "O" ~ "Offense",
+      "D" ~ "Defense",
+      "S" ~ "Special Teams"
+    ),
+    side = factor(side, levels = c("Offense", "Defense", "Special Teams")),
+    w_av = ifelse(is.na(w_av), 0, w_av) # NA means no NFL snaps; therefore 0 AV
+    )
 
 write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
 
 ```
 
 ## Exploratory Data Analysis
+
+### Total Weighted AV by Draft Season
 
 ```{r}
 
@@ -51,9 +67,18 @@ basic_av_plot
 
 ```
 
+### Weighted AV Per Player, by Position Category
+
 ```{r}
 
-drafts
+draft_data %>%
+  ggplot(aes(x = category, y = w_av, fill = side)) + 
+  geom_boxplot() + 
+  theme_classic() + 
+  labs(
+    y = "Weighted AV",
+    x = "Position Group"
+  )
 
 ```
 
