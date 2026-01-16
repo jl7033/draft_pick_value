@@ -23,6 +23,17 @@ drafts = load_draft_picks(seasons = 1994:2016)
 draft_data = drafts %>%
   select(season, round, pick, pfr_player_name, position, category, side, team, w_av) %>%
   mutate(
+    round = factor(round, levels = 1:7),
+    draft_day = case_match(
+      round,
+      "1" ~ "Day 1",
+      "2" ~ "Day 2",
+      "3" ~ "Day 2",
+      "4" ~ "Day 3",
+      "5" ~ "Day 3",
+      "6" ~ "Day 3",
+      "7" ~ "Day 3"
+    ),
     category = ifelse(category == "K" | category == "P" | category == "LS", "ST", category),
     category = factor(
       category,
@@ -78,7 +89,26 @@ draft_data %>%
   labs(
     y = "Weighted AV",
     x = "Position Group"
-  )
+  ) + 
+  theme(legend.title = element_blank())
+
+```
+
+### Weighted AV Per Player, by Position Category, by Round
+
+
+```{r}
+
+draft_data %>%
+  ggplot(aes(x = category, y = w_av, fill = side)) + 
+  geom_boxplot() + 
+  theme_classic() + 
+  labs(
+    y = "Weighted AV",
+    x = "Position Group"
+  ) + 
+  facet_wrap(~ draft_day) +
+  theme(legend.title = element_blank())
 
 ```
 
