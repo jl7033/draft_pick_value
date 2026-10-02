@@ -1,8 +1,10 @@
 ---
-title: "draft_analysis"
+title: "Analyzing Historical Trends in NFL Draft Value Charts"
 author: "Joe LaRocca"
-date: "2026-01-16"
-output: html_document
+date: "October 2, 2026"
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +14,30 @@ library(cowplot)
 library(readxl)
 library(nflreadr)
 ```
+
+On October 12th, 1989, the Minnesota Vikings and Dallas Cowboys agreed to one of the most seismic trades in NFL history. The Vikings had made the playoffs each of the previous two seasons, but lost to Washington and San Francisco in the 1987 and 1988 playoffs, respectively. Minnesota didn't feature a strong rushing attack in either loss; in the '87 NFC Championship Game against Washington, their leading rusher was QB Wade Wilson, who picked up just 28 yards. The bar was set even lower in the '88 NFC Divisional Game against the 49ers, where RB Allen Rice managed just 20 yards on five carries. In order to keep up in the arms race with the NFC's top teams, the Vikings aggressively pursued star RB Herschel Walker from Dallas, a team that just finished 3-13 in 1988 and was on its way to being even worse in '89. The biggest question for the Vikings was not whether the Cowboys would be willing to trade Walker, but what the cost would be.
+
+The answer, it turned out, was five players and a boatload of draft picks -- eight of them, to be specific. Though Minnesota did get four picks back in the three-team deal (the San Diego Chargers received one of the five players in exchange for a late-round pick going to the Vikings), none of them were earlier than the third round. Dallas, on the other hand, received first- and second-round picks in 1990, 1991, and 1992, along with a sixth-round pick in 1990 and a third-round pick in 1992. The trade included an interesting clause that allowed the Vikings to keep several of the picks if the Cowboys kept the players acquired in the deal past the 1990 season, but only one of them lasted that long in Dallas; the fourth, CB Issiac Holt, was cut following the 1992 season, one in which the Cowboys -- yes, the previous bottom-feeding Cowboys -- won the Super Bowl by a score of 52 to 17.
+
+After being blown out by the 49ers in the 1989 playoffs in a game in which Walker picked up just 43 rushing and receiving yards, the Vikings missed the playoffs in 1990 and 1991, after which Walker left the Vikings and finished out his career with the Eagles, Giants, and ironically, a return to the Cowboys. He'd never reach the heights that he did in his first stint in Dallas again. The Cowboys, meanwhile, used the picks acquired in the trade (either directly or through subsequent trades) to draft Emmitt Smith, one of the greatest running backs of all time, as well as DB Darren Woodson and DT Russell Maryland, who anchored a defense that helped Dallas win two more Super Bowls in '93 and '95.
+
+The Herschel Walker trade is now widely considered one of the best trades in NFL trades from Dallas' standpoint, and one of the worst from Minnesota's. It renewed debate about the value of draft picks compared to established players, and how draft picks in different rounds should be weighted. It should come as no surprise at this point that Jimmy Johnson, the head coach of the first two of Dallas' Super Bowl teams in the 1990s, constructed the first widely accepted draft pick value chart, with relative point values assigned to picks 1 through 270. Since then, other NFL executives have attempted to improve on Johnson's chart in order to most accurately recognize the value of their own draft picks and make data-informed decisions on when to trade the draft picks for either other picks or players.
+
+At the same time, draft picks only lead to improvement if the picks turn into impactful players. In Dallas' case, they certainly did, but other teams, such as the St. Louis Rams, who acquired first-round picks in 2012, 2013, and 2014 as well as a second-rounder in 2012 to allow Washington to trade up for QB Robert Griffin III, didn't take as much advantage. After a trade down in the 2012 draft, the Rams ended up with five players from the deal. Some of them, especially DT Michael Brockers and CB Janoris Jenkins, were solid, but none were franchise-changing, especially OT Greg Robinson, drafted 2nd overall with Washington's pick in 2014 but only playing three seasons with the Rams, none of them particularly good. (Yes, the Rams did draft future Hall of Fame DT Aaron Donald in 2014 as well, but that was with their own pick). The Rams didn't make the playoffs again until 2017, with none of those players remaining on the roster (and the franchise having moved to Los Angeles).
+
+With that in mind, I'm analyzing not just how draft pick value can be most efficiently measured, but also which teams have gotten the most out of their draft picks. What patterns emerge? Do those teams utilize more picks in the earlier or later rounds? Do they focus on drafting specific position groups while prioritizing signing others in free agency? What do they do about the quarterback position, often called the most important position in American sports? 
+
+This analysis will take place in two distinct parts. The first involves using Pro Football Reference's Approximate Value (wAV) -- a single number that estimates a player's value to their team, adjusted for position -- to compare two historical draft pick value charts. wAV works by first calculating a player's unweighted Approximate Value (AV) for each season, and then taking a weighted sum -- $100\%$ of their best season's AV followed by $95\%$ of their second-best AV, followed by $90\%$ of their third-best AV, etc. While wAV certainly isn't a perfect metric, I've found that it can reasonably compare players who play completely different positions (say, a middle linebacker vs. a left tackle) and can simplify analyses, leading to more interpretable conclusions.
+
+The second will try to address which teams have taken the most advantage of their draft picks, and the trends that they've used when selecting players.
+
+Specifically, here are our research goals:
+
+1) To evaluate the relationship between each draft pick values for each chart and weighted AV, both as a whole and stratified by position
+
+2) To analyze ten recent trades involving two or more first-round picks, the relative pick values of each of the picks (and players) involved, and who "won" the trades, both in theory and in practice (which is admittedly subjective)
+
+3) To identify one or more teams that have done a particularly good job using their draft capital since 1994
 
 ## Upload and Clean Data
 
@@ -57,7 +83,7 @@ draft_data_raw = drafts %>%
     w_av = ifelse(is.na(w_av), 0, w_av) # NA means no NFL snaps; therefore 0 AV,
     )
 
-write_csv(draft_data, "Data/draft_data_consolidated_1994_2016.csv")
+write_csv(draft_data_raw, "Data/draft_data_consolidated_1994_2016.csv")
 
 ```
 
@@ -188,7 +214,7 @@ scatter_meers = draft_data %>%
   theme_classic() + 
   labs(
     title = "Meers Method",
-    x = "Pick Value",
+    x = "Pick Value (Meers' Method)",
     y = "Mean Weighted AV"
   )
 
@@ -242,6 +268,8 @@ scatter_meers_pos = draft_data %>%
     x = "Pick Value",
     y = "Mean Weighted AV"
   )
+
+scatter_meers_pos
 
 ```
 
